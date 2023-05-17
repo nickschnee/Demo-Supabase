@@ -67,6 +67,7 @@ async function renderTodos(loggedIn) {
         if (newTodo) {
           updateData(todo.id, newTodo).then(() => {
             listItem.textContent = newTodo;
+            renderTodos(true);
           });
         }
       });
@@ -91,30 +92,38 @@ async function renderTodos(loggedIn) {
 
 // Show create todo button only when user is logged in
 function showCreateTodoButton() {
-    const createButton = document.createElement("button");
-    createButton.textContent = "Create Todo";
-    createButton.setAttribute("id", "create-button");
-    createButton.addEventListener("click", async () => {
-      const newTodo = prompt("Enter new todo:");
-      if (newTodo) {
-        const createdTodo = await createData(newTodo);
-        renderTodos();
-      }
-    });
-    document.body.appendChild(createButton);
-  }
-  
-  // Remove create todo button when user is logged out
-  function removeCreateTodoButton() {
-    const createButton = document.getElementById("create-button");
-    if (createButton) {
-      document.body.removeChild(createButton);
+  const createButton = document.createElement("button");
+  createButton.textContent = "Create Todo";
+  createButton.setAttribute("id", "create-button");
+  createButton.addEventListener("click", async () => {
+    const newTodo = prompt("Enter new todo:");
+    if (newTodo) {
+      const createdTodo = await createData(newTodo);
+      renderTodos(true);
     }
+  });
+  document.body.appendChild(createButton);
+}
+
+// Remove create todo button when user is logged out
+function removeCreateTodoButton() {
+  const createButton = document.getElementById("create-button");
+  if (createButton) {
+    document.body.removeChild(createButton);
   }
-  
-  // Show login button when user is logged out
-  function showLoginButton() {
+}
+
+// Show login button when user is logged out
+function showLoginButton() {
+    
+  // if login button already exists, don't create a new one
+  if (document.getElementById("login-button")) {
+
+  } else {
+
+    console.log("showing login button");
     const loginButton = document.createElement("button");
+    loginButton.id = "login-button"; // Assign an ID to the login button
     loginButton.textContent = "Login to create, update and delete todos";
     loginButton.addEventListener("click", () => {
       const email = prompt("Please enter your email to receive a magic link:");
@@ -122,32 +131,41 @@ function showCreateTodoButton() {
         signInWithEmail(email);
       }
     });
-  
+
     document.body.appendChild(loginButton);
   }
+}
 
-  function showLogoutButton() {
-    const logoutButton = document.createElement("button");
-    logoutButton.textContent = "Logout";
-    logoutButton.setAttribute("id", "logout-button");
-    logoutButton.addEventListener("click", async () => {
-      await supa.auth.signOut();
-      removeLogoutButton();
-      removeCreateTodoButton();
-      showLoginButton();
-      renderTodos(false);
-    });
-  
-    document.body.appendChild(logoutButton);
+// Remove login button when user is logged in
+function removeLoginButton() {
+  console.log("removing login button");
+  const loginButton = document.getElementById("login-button");
+  if (loginButton) {
+    loginButton.remove();
   }
-  
-  function removeLogoutButton() {
-    const logoutButton = document.getElementById("logout-button");
-    if (logoutButton) {
-      document.body.removeChild(logoutButton);
-    }
-  }
+}
 
+function showLogoutButton() {
+  const logoutButton = document.createElement("button");
+  logoutButton.textContent = "Logout";
+  logoutButton.setAttribute("id", "logout-button");
+  logoutButton.addEventListener("click", async () => {
+    await supa.auth.signOut();
+    removeLogoutButton();
+    removeCreateTodoButton();
+    showLoginButton();
+    renderTodos(false);
+  });
+
+  document.body.appendChild(logoutButton);
+}
+
+function removeLogoutButton() {
+  const logoutButton = document.getElementById("logout-button");
+  if (logoutButton) {
+    document.body.removeChild(logoutButton);
+  }
+}
 
 // AUTHENTICATION LOGIC
 // AUTHENTICATION LOGIC
@@ -172,10 +190,15 @@ async function signInWithEmail(email) {
 // Check if user is logged in
 async function checkAuth() {
   const user = supa.auth.user();
+
+  console.log("Checking auth...", user);
+
   if (user) {
+    console.log("User is logged in");
     showCreateTodoButton();
     showLogoutButton();
     renderTodos(true);
+    removeLoginButton();
   } else {
     removeCreateTodoButton();
     removeLogoutButton();
@@ -193,5 +216,14 @@ supa.auth.onAuthStateChange(async (event, session) => {
   }
 });
 
-// Check auth on page load
+// Add this function to handle the auth state change
+function handleAuthStateChange(event, session) {
+  console.log("Auth state changed:", event, session);
+  checkAuth();
+}
+
+// this is needed when coming from the magiclink email
+supa.auth.onAuthStateChange(handleAuthStateChange);
+
+// this is needed whenever reloading the page
 checkAuth();
