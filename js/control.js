@@ -1,81 +1,95 @@
-import { supa } from './supabase.js'
+import { supa } from "./supabase.js";
 
-//Daten auslesen
+// CRUD OPERATIONS
+// CRUD OPERATIONS
+// CRUD OPERATIONS
+// CRUD OPERATIONS
+// CRUD OPERATIONS
+// CRUD OPERATIONS
+// CRUD OPERATIONS
+
+// SELECT Data from Supabase
 async function getData() {
-    const { data, error } = await supa
-        .from('todos')
-        .select()
+  const { data, error } = await supa.from("todos").select();
 
-    return data;
+  return data;
 }
 
+// INSERT Data into Supabase
 async function createData(todo) {
-    const { data, error } = await supa
-        .from('todos')
-        .insert([{ todo }]);
+  const { data, error } = await supa.from("todos").insert([{ todo }]);
 
-    return data;
+  return data;
 }
 
+// UPDATE Data in Supabase
 async function updateData(id, newTodo) {
-    const { data, error } = await supa
-        .from('todos')
-        .update({ todo: newTodo })
-        .match({ id })
+  const { data, error } = await supa
+    .from("todos")
+    .update({ todo: newTodo })
+    .match({ id });
 
-    return data;
+  return data;
 }
 
+// DELETE Data from Supabase
 async function deleteData(id) {
-    const { data, error } = await supa
-        .from('todos')
-        .delete()
-        .match({ id })
+  const { data, error } = await supa.from("todos").delete().match({ id });
 
-    return data;
+  return data;
 }
 
+// RENDERING VIEWS BASED ON LOGIN STATUS
+// RENDERING VIEWS BASED ON LOGIN STATUS
+// RENDERING VIEWS BASED ON LOGIN STATUS
+// RENDERING VIEWS BASED ON LOGIN STATUS
+// RENDERING VIEWS BASED ON LOGIN STATUS
+// RENDERING VIEWS BASED ON LOGIN STATUS
+// RENDERING VIEWS BASED ON LOGIN STATUS
+
+// Logic to render todos in HTML
 async function renderTodos(loggedIn) {
-    const todos = await getData();
-    const todosList = document.getElementById('todos-list');
+  const todos = await getData();
+  const todosList = document.getElementById("todos-list");
 
-    todosList.innerHTML = '';
+  todosList.innerHTML = "";
 
-    todos.forEach(todo => {
-        const listItem = document.createElement('li');
-        listItem.classList.add('todo-item');
-        listItem.textContent = todo.todo;
+  todos.forEach((todo) => {
+    const listItem = document.createElement("li");
+    listItem.classList.add("todo-item");
+    listItem.textContent = todo.todo;
 
-        if (loggedIn) {
-            const editButton = document.createElement('button');
-            editButton.textContent = 'Edit';
-            editButton.addEventListener('click', () => {
-                const newTodo = prompt('Enter new todo:', todo.todo);
-                if (newTodo) {
-                    updateData(todo.id, newTodo).then(() => {
-                        listItem.textContent = newTodo;
-                    });
-                }
-            });
-
-            const deleteButton = document.createElement('button');
-            deleteButton.textContent = 'Delete';
-            deleteButton.addEventListener('click', () => {
-                if (confirm('Are you sure you want to delete this todo?')) {
-                    deleteData(todo.id).then(() => {
-                        todosList.removeChild(listItem);
-                    });
-                }
-            });
-
-            listItem.appendChild(editButton);
-            listItem.appendChild(deleteButton);
+    if (loggedIn) {
+      const editButton = document.createElement("button");
+      editButton.textContent = "Edit";
+      editButton.addEventListener("click", () => {
+        const newTodo = prompt("Enter new todo:", todo.todo);
+        if (newTodo) {
+          updateData(todo.id, newTodo).then(() => {
+            listItem.textContent = newTodo;
+          });
         }
+      });
 
-        todosList.appendChild(listItem);
-    });
+      const deleteButton = document.createElement("button");
+      deleteButton.textContent = "Delete";
+      deleteButton.addEventListener("click", () => {
+        if (confirm("Are you sure you want to delete this todo?")) {
+          deleteData(todo.id).then(() => {
+            todosList.removeChild(listItem);
+          });
+        }
+      });
+
+      listItem.appendChild(editButton);
+      listItem.appendChild(deleteButton);
+    }
+
+    todosList.appendChild(listItem);
+  });
 }
 
+// Show create todo button only when user is logged in
 function showCreateTodoButton() {
     const createButton = document.createElement("button");
     createButton.textContent = "Create Todo";
@@ -89,58 +103,28 @@ function showCreateTodoButton() {
     });
     document.body.appendChild(createButton);
   }
-
+  
+  // Remove create todo button when user is logged out
   function removeCreateTodoButton() {
     const createButton = document.getElementById("create-button");
     if (createButton) {
       document.body.removeChild(createButton);
     }
   }
-
-function showLoginButton() {
-    const loginButton = document.createElement('button');
-    loginButton.textContent = 'Login to create, update and delete todos';
-    loginButton.addEventListener('click', () => {
-        const email = prompt('Please enter your email to receive a magic link:');
-        if (email) {
-            signInWithEmail(email);
-        }
+  
+  // Show login button when user is logged out
+  function showLoginButton() {
+    const loginButton = document.createElement("button");
+    loginButton.textContent = "Login to create, update and delete todos";
+    loginButton.addEventListener("click", () => {
+      const email = prompt("Please enter your email to receive a magic link:");
+      if (email) {
+        signInWithEmail(email);
+      }
     });
-
+  
     document.body.appendChild(loginButton);
-}
-
-async function signInWithEmail(email) {
-    const { error } = await supa.auth.signIn({ email });
-    if (error) {
-      console.error('Error sending magic link:', error.message);
-    } else {
-      alert('Magic link sent to your email!');
-    }
   }
-  
-  async function checkAuth() {
-    const user = supa.auth.user();
-    if (user) {
-      showCreateTodoButton();
-      showLogoutButton();
-      renderTodos(true);
-    } else {
-      removeCreateTodoButton();
-      removeLogoutButton();
-      showLoginButton();
-      renderTodos(false);
-    }
-  }
-  
-  supa.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN') {
-      renderTodos();
-    } else if (event === 'SIGNED_OUT') {
-      alert('You have been signed out.');
-    }
-  });
-  
 
   function showLogoutButton() {
     const logoutButton = document.createElement("button");
@@ -156,7 +140,7 @@ async function signInWithEmail(email) {
   
     document.body.appendChild(logoutButton);
   }
-
+  
   function removeLogoutButton() {
     const logoutButton = document.getElementById("logout-button");
     if (logoutButton) {
@@ -165,4 +149,49 @@ async function signInWithEmail(email) {
   }
 
 
+// AUTHENTICATION LOGIC
+// AUTHENTICATION LOGIC
+// AUTHENTICATION LOGIC
+// AUTHENTICATION LOGIC
+// AUTHENTICATION LOGIC
+// AUTHENTICATION LOGIC
+// AUTHENTICATION LOGIC
+// AUTHENTICATION LOGIC
+// AUTHENTICATION LOGIC
+
+// Send email Magic Link
+async function signInWithEmail(email) {
+  const { error } = await supa.auth.signIn({ email });
+  if (error) {
+    console.error("Error sending magic link:", error.message);
+  } else {
+    alert("Magic link sent to your email!");
+  }
+}
+
+// Check if user is logged in
+async function checkAuth() {
+  const user = supa.auth.user();
+  if (user) {
+    showCreateTodoButton();
+    showLogoutButton();
+    renderTodos(true);
+  } else {
+    removeCreateTodoButton();
+    removeLogoutButton();
+    showLoginButton();
+    renderTodos(false);
+  }
+}
+
+// Listen to auth changes
+supa.auth.onAuthStateChange(async (event, session) => {
+  if (event === "SIGNED_IN") {
+    renderTodos();
+  } else if (event === "SIGNED_OUT") {
+    alert("You have been signed out.");
+  }
+});
+
+// Check auth on page load
 checkAuth();
