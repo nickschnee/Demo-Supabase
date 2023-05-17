@@ -2,6 +2,10 @@
 
 Written in Vanilla JS
 
+## Demo
+
+[https://supabase.nickschnee.ch/](supabase.nickschnee.ch)
+
 ## Installation
 
 1) If you want to make this demo work in your own environment, you have to create a new file called `supabase.js` in the folder `js`
